@@ -24,6 +24,7 @@
 /*****************************************************************************
  *	Public Includes
  *****************************************************************************/
+#include "hal_systimer.h"
 #include <stdbool.h>
 #include <stdint.h>
 /*****************************************************************************
@@ -62,7 +63,7 @@ typedef struct
 {
     scheduler_task_handle_t* task_table; /**< An array of task handles for the tasks to be executed by the scheduler. */
     uint32_t                 task_table_size;   /**< The size of the task table array. */
-    uint8_t                  hal_systimer_ch;   /**< The channel of the hardware system timer used by the scheduler. */
+    hal_systimer_channel_t   hal_systimer_ch;   /**< The channel of the hardware system timer used by the scheduler. */
     uint32_t                 millisec_per_tick; /**< The duration of a single tick, in milliseconds. */
 } scheduler_config_t;
 

@@ -24,11 +24,11 @@
  *****************************************************************************/
 struct scheduler_t
 {
-    volatile uint64_t     ticks;
-    struct hal_systimer_t hal_systimer;          /*< Hardware abstraction layer timer used by the scheduler */
-    uint32_t              registered_task_count; /*< Number of registered tasks in the scheduler */
-    scheduler_config_t    config;
-    bool                  initialized;
+    volatile uint64_t  ticks;
+    hal_systimer_t     hal_systimer;          /*< Hardware abstraction layer timer used by the scheduler */
+    uint32_t           registered_task_count; /*< Number of registered tasks in the scheduler */
+    scheduler_config_t config;
+    bool               initialized;
 };
 /*****************************************************************************
  *	Private Variables
@@ -58,7 +58,7 @@ scheduler_err_t scheduler_init(scheduler_config_t* config)
 
     scheduler.ticks = 0;
 
-    struct hal_systimer_config_t timer_config = {
+    hal_systimer_config_t timer_config = {
         .channel = config->hal_systimer_ch,
         .cb =
             {
@@ -89,7 +89,8 @@ void scheduler_process(void)
         return;
     }
 
-    for (uint32_t i = 0; i < scheduler.registered_task_count; i++)
+    uint32_t i;
+    for (i = 0; i < scheduler.registered_task_count; i++)
     {
         scheduler_task_handle_t task_handle = scheduler.config.task_table[i];
         process_task(task_handle);
@@ -185,7 +186,8 @@ void scheduler_set_task_interval(scheduler_task_handle_t task_handle, uint16_t t
  *****************************************************************************/
 static void scheduler_update_count_tick(void* param)
 {
-    for (uint32_t i = 0; i < scheduler.config.task_table_size; i++)
+    uint32_t i;
+    for (i = 0; i < scheduler.config.task_table_size; i++)
     {
         scheduler_task_t* task = scheduler.config.task_table[i];
         count_down_task_timer(task);
