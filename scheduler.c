@@ -1,7 +1,3 @@
-/*****************************************************************************
- *  Copyright (C) RJ Brands 2021. All rights reserved.
- *****************************************************************************/
-
 /**
  * @file scheduler.c
  *
@@ -29,8 +25,8 @@
 struct scheduler_t
 {
     volatile uint64_t     ticks;
-    struct hal_systimer_t hal_systimer;
-    uint32_t              registered_task_count;
+    struct hal_systimer_t hal_systimer;          /*< Hardware abstraction layer timer used by the scheduler */
+    uint32_t              registered_task_count; /*< Number of registered tasks in the scheduler */
     scheduler_config_t    config;
     bool                  initialized;
 };
@@ -187,9 +183,6 @@ void scheduler_set_task_interval(scheduler_task_handle_t task_handle, uint16_t t
 /*****************************************************************************
  *	Private Functions
  *****************************************************************************/
-/*
- * PLACE IN ISR ROUTINE: 1ms Timer
- */
 static void scheduler_update_count_tick(void* param)
 {
     for (uint32_t i = 0; i < scheduler.config.task_table_size; i++)
