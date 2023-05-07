@@ -19,18 +19,6 @@
 /*****************************************************************************
  *	Public Defines & Macros
  *****************************************************************************/
-#define SCHEDULER_PERIOD_NONE  0
-#define SCHEDULER_PERIOD_1MS   1
-#define SCHEDULER_PERIOD_5MS   5
-#define SCHEDULER_PERIOD_10MS  10
-#define SCHEDULER_PERIOD_50MS  50
-#define SCHEDULER_PERIOD_100MS 100
-#define SCHEDULER_PERIOD_200MS 200
-#define SCHEDULER_PERIOD_500MS 500
-#define SCHEDULER_PERIOD_750MS 750
-#define SCHEDULER_PERIOD_1S    1000
-#define SCHEDULER_PERIOD_2S    2000
-#define SCHEDULER_PERIOD_10S   10000
 
 /*****************************************************************************
  *	Public Typedefs & Enumerations
@@ -43,8 +31,8 @@ typedef enum
 
 typedef struct
 {
-    void (*task_init)(void);
-    void (*task_run)(void);
+    void (*task_cb)(void*);
+    void*    param;
     uint16_t time_ms;
 } scheduler_task_config_t;
 
@@ -77,8 +65,4 @@ void            scheduler_set_semaphore(scheduler_task_handle_t task_handle);
 void            scheduler_halt_periodic_task(scheduler_task_handle_t task_handle);
 void            scheduler_restart_periodic_task(scheduler_task_handle_t task_handle);
 void            scheduler_set_task_interval(scheduler_task_handle_t task_handle, uint16_t time_ms);
-uint64_t        scheduler_get_tick_count(void);
-uint64_t        scheduler_get_time_ms(void);
-uint64_t        scheduler_get_time_lapse_ms(uint64_t from_time_ms);
-void            scheduler_delay_ms(uint64_t delay_time_ms);
 #endif /* __SCHEDULER_H */

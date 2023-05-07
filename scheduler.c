@@ -45,7 +45,6 @@ static void scheduler_update_count_tick(void* param);
 static bool is_task_ready_to_run(scheduler_task_handle_t task_handle);
 static void process_task(scheduler_task_handle_t task_handle);
 static void count_down_task_timer(scheduler_task_handle_t task_handle);
-static void initialize_task_func(scheduler_task_handle_t task_handle);
 /*****************************************************************************
  *	Public Functions
  *****************************************************************************/
@@ -103,7 +102,7 @@ void scheduler_process(void)
 
 scheduler_err_t scheduler_register_task(scheduler_task_handle_t task_handle, scheduler_task_config_t* config)
 {
-    if (task_handle == NULL || config == NULL || config->task_run == NULL)
+    if (task_handle == NULL || config == NULL || config->task_cb == NULL)
     {
         return SCHEDULER_ERROR;
     }
@@ -127,8 +126,6 @@ scheduler_err_t scheduler_register_task(scheduler_task_handle_t task_handle, sch
 
     scheduler.config.task_table[scheduler.registered_task_count] = task_handle;
     scheduler.registered_task_count++;
-
-    initialize_task_func(task_handle);
 
     task_handle->reload_ticks = config->time_ms / scheduler.config.millisec_per_tick;
     task_handle->tick_counter = task_handle->reload_ticks;
@@ -187,32 +184,6 @@ void scheduler_set_task_interval(scheduler_task_handle_t task_handle, uint16_t t
     return;
 }
 
-uint64_t scheduler_get_tick_count(void)
-{
-    return scheduler.ticks;
-}
-uint64_t scheduler_get_time_ms(void)
-{
-    return scheduler.ticks * scheduler.config.millisec_per_tick;
-}
-
-uint64_t scheduler_get_time_lapse_ms(uint64_t from_time_ms)
-{
-    uint64_t time_now = scheduler_get_time_ms();
-
-    return (time_now - from_time_ms);
-}
-
-void scheduler_delay_ms(uint64_t delay_time_ms)
-{
-    uint64_t time_start = scheduler_get_time_ms();
-    uint64_t time_lapse;
-    do
-    {
-        time_lapse = scheduler_get_time_lapse_ms(time_start);
-    } while (time_lapse < delay_time_ms);
-}
-
 /*****************************************************************************
  *	Private Functions
  *****************************************************************************/
@@ -228,18 +199,6 @@ static void scheduler_update_count_tick(void* param)
     }
 
     scheduler.ticks++;
-}
-
-static void initialize_task_func(scheduler_task_handle_t task_handle)
-{
-    void (*task_init)(void) = task_handle->config.task_init;
-
-    if (task_init == NULL)
-    {
-        return;
-    }
-
-    task_init();
 }
 
 static bool is_task_ready_to_run(scheduler_task_handle_t task_handle)
@@ -269,7 +228,7 @@ static void process_task(scheduler_task_handle_t task_handle)
         return;
     }
 
-    if (task_handle->config.task_run == NULL)
+    if (task_handle->config.task_cb == NULL)
     {
         return;
     }
@@ -282,8 +241,9 @@ static void process_task(scheduler_task_handle_t task_handle)
     task_handle->semaphore    = false;
     task_handle->tick_counter = task_handle->reload_ticks;
 
-    void (*task_run)(void) = task_handle->config.task_run;
-    task_run();
+    void (*task_cb)(void*) = task_handle->config.task_cb;
+    void* param            = task_handle->config.param;
+    task_cb(param);
 
     return;
 }
